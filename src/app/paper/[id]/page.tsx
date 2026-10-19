@@ -191,7 +191,7 @@ export default async function PaperDetailPage({ params }: { params: { id: string
           <div>
             <dt className="text-slate-400">Data Source</dt>
             <dd className="uppercase font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
-              {paper.source} (Zero-Cost Public API)
+              {paper.source}
             </dd>
           </div>
 

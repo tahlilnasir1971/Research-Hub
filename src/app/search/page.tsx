@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Search, Loader2, AlertCircle, FileSearch, ArrowLeft, ArrowRight, ShieldCheck } from "lucide-react";
+import { Search, Loader2, AlertCircle, FileSearch, ArrowLeft, ArrowRight } from "lucide-react";
 import { PaperCard } from "@/components/PaperCard";
 import { SearchFilters } from "@/components/SearchFilters";
 import { SearchResult, SearchFilters as FilterType } from "@/lib/scholarly/types";
@@ -30,6 +30,7 @@ function SearchContent() {
       return;
     }
 
+    const controller = new AbortController();
     const fetchResults = async () => {
       setLoading(true);
       setError(null);
@@ -43,20 +44,22 @@ function SearchContent() {
       if (yearMaxParam) params.set("yearMax", yearMaxParam.toString());
 
       try {
-        const res = await fetch(`/api/search?${params.toString()}`);
+        const res = await fetch(`/api/search?${params.toString()}`, { signal: controller.signal });
         if (!res.ok) {
-          throw new Error(`Search request failed with status ${res.status}`);
+          if (res.status === 429) throw new Error("The scholarly source is receiving too many requests. Wait briefly and try again.");
+          throw new Error("The scholarly source could not complete this search. Please try again.");
         }
         const json: SearchResult = await res.json();
         setData(json);
       } catch (err: any) {
-        setError(err.message || "Failed to fetch research papers");
+        if (err.name !== "AbortError") setError(err.message || "Could not fetch research papers.");
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     };
 
     fetchResults();
+    return () => controller.abort();
   }, [query, pageParam, openAccessParam, yearMinParam, yearMaxParam, sortByParam]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -116,7 +119,7 @@ function SearchContent() {
               type="text"
               value={inputQuery}
               onChange={(e) => setInputQuery(e.target.value)}
-              placeholder="Search 250M+ papers across OpenAlex, arXiv, and Crossref..."
+              placeholder="Search papers across OpenAlex, arXiv, and Crossref"
               className="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
@@ -143,13 +146,10 @@ function SearchContent() {
             onApply={handleApplyFilters}
           />
 
-          <div className="p-4 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/40 text-xs text-indigo-900 dark:text-indigo-200 space-y-1.5">
-            <div className="flex items-center gap-1.5 font-bold">
-              <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              <span>Zero-Cost Guarantee</span>
-            </div>
-            <p className="text-[11px] leading-relaxed text-indigo-800/80 dark:text-indigo-300/80">
-              Data is delivered via unauthenticated open scientific APIs with zero subscription costs.
+          <div className="border-l-2 border-indigo-600 py-1 pl-4 text-xs text-slate-600 dark:text-slate-300 space-y-1.5">
+            <p className="font-semibold text-slate-800 dark:text-slate-100">About these results</p>
+            <p className="text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+              Results are retrieved from public scholarly APIs. Availability and coverage vary by source.
             </p>
           </div>
         </div>
@@ -201,7 +201,7 @@ function SearchContent() {
             <div className="py-20 text-center space-y-3 p-8 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
               <FileSearch className="w-12 h-12 text-slate-300 mx-auto" />
               <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">
-                Ready to search 250M+ papers
+                Search scholarly literature
               </h3>
               <p className="text-xs text-slate-500 max-w-sm mx-auto">
                 Type in keywords, researcher names, paper titles, or DOIs to discover scientific literature.

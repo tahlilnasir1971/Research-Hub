@@ -8,7 +8,7 @@ import {
   Download,
   BookOpen,
   ArrowRight,
-  ShieldCheck,
+  Database,
   FileText,
 } from "lucide-react";
 import { getLocalBookmarks, BookmarkedPaper } from "@/lib/supabase/client";
@@ -87,7 +87,7 @@ export default function LibraryPage() {
             Saved Research Library
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Papers you have saved for later reading. Stored client-side with zero cost and complete privacy.
+            Papers you have saved for later reading. This library is stored in this browser and is not synced to other devices.
           </p>
         </div>
 
@@ -111,13 +111,13 @@ export default function LibraryPage() {
         )}
       </div>
 
-      {/* Zero Cost Notice */}
-      <div className="p-4 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200/80 dark:border-emerald-800/60 flex items-start gap-3">
-        <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-        <div className="text-xs text-emerald-900 dark:text-emerald-200 space-y-1">
-          <p className="font-bold">Zero-Cost Storage Architecture</p>
-          <p className="text-emerald-800/80 dark:text-emerald-300/80">
-            Your library uses local browser storage by default. You do not need a paid database or user account to organize research papers. Optional Supabase cloud synchronization can be activated via environment variables.
+      {/* Local storage notice */}
+      <div className="flex items-start gap-3 border-l-2 border-indigo-600 py-1 pl-4">
+        <Database className="mt-0.5 h-4 w-4 shrink-0 text-indigo-700 dark:text-indigo-300" />
+        <div className="space-y-1 text-xs text-slate-600 dark:text-slate-300">
+          <p className="font-semibold text-slate-800 dark:text-slate-100">Stored in this browser</p>
+          <p className="text-slate-500 dark:text-slate-400">
+            Saved papers stay in this browser’s local storage. Clearing browser data can remove them; cloud sync is not enabled.
           </p>
         </div>
       </div>

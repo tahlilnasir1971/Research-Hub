@@ -2,12 +2,11 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { ZeroCostBadge } from "@/components/ZeroCostBadge";
 
 export const metadata: Metadata = {
-  title: "Research Hub — Zero-Cost Open Scholarly Discovery",
+  title: "Research Hub — Scholarly discovery workspace",
   description:
-    "Discover 250M+ scientific papers, preprints, and open-access research across OpenAlex, arXiv, and Crossref. Completely free, open, and without subscription paywalls.",
+    "Search scholarly literature across OpenAlex, arXiv, and Crossref. Organize papers and explore research topics.",
   keywords: [
     "research",
     "open access",
@@ -28,8 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased selection:bg-indigo-500 selection:text-white">
-        <ZeroCostBadge variant="banner" />
+      <body className="flex min-h-screen flex-col antialiased selection:bg-indigo-200 selection:text-slate-950 dark:selection:bg-indigo-800 dark:selection:text-white">
         <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />

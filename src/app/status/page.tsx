@@ -1,213 +1,57 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import {
-  Activity,
-  CheckCircle2,
-  Clock,
-  ShieldCheck,
-  Server,
-  Zap,
-  ExternalLink,
-  Cpu,
-  Database,
-  Cloud,
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Activity, AlertCircle, CheckCircle2, Clock, Cpu, ExternalLink, Server } from "lucide-react";
+
+type ServiceState = "checking" | "online" | "unavailable";
 
 export default function StatusPage() {
-  const [openAlexStatus, setOpenAlexStatus] = useState<"checking" | "online" | "offline">("checking");
-  const [openAlexLatency, setOpenAlexLatency] = useState<number | null>(null);
-
-  const [aiStatus, setAiStatus] = useState<{
-    isConfigured: boolean;
-    model: string;
-    provider: string;
-  } | null>(null);
+  const [openAlex, setOpenAlex] = useState<{ state: ServiceState; latency?: number }>({ state: "checking" });
+  const [aiStatus, setAiStatus] = useState<{ isConfigured: boolean; model: string } | null>(null);
 
   useEffect(() => {
-    // Ping OpenAlex
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 8000);
     const start = performance.now();
-    fetch("https://api.openalex.org/works?per_page=1", {
-      headers: { "User-Agent": "ResearchHub/1.0 (status-ping)" },
-    })
-      .then((res) => {
-        if (res.ok) {
-          setOpenAlexStatus("online");
-          setOpenAlexLatency(Math.round(performance.now() - start));
-        } else {
-          setOpenAlexStatus("offline");
-        }
-      })
-      .catch(() => setOpenAlexStatus("offline"));
-
-    // Check AI status
-    fetch("/api/ai/status")
-      .then((res) => res.json())
-      .then((data) => setAiStatus(data))
-      .catch(() => setAiStatus({ isConfigured: false, model: "none", provider: "none" }));
+    fetch("https://api.openalex.org/works?per_page=1", { signal: controller.signal })
+      .then((response) => setOpenAlex({ state: response.ok ? "online" : "unavailable", latency: Math.round(performance.now() - start) }))
+      .catch(() => setOpenAlex({ state: "unavailable" }))
+      .finally(() => window.clearTimeout(timeout));
+    fetch("/api/ai/status", { signal: controller.signal })
+      .then((response) => response.ok ? response.json() : Promise.reject())
+      .then((data) => setAiStatus({ isConfigured: Boolean(data.isConfigured), model: String(data.model || "Not configured") }))
+      .catch(() => setAiStatus({ isConfigured: false, model: "Status unavailable" }));
+    return () => { controller.abort(); window.clearTimeout(timeout); };
   }, []);
 
+  const statusStyle = (state: ServiceState) => state === "online" ? "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200" : state === "checking" ? "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200" : "border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-200";
+
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
-      {/* Header */}
-      <div className="space-y-3">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-          <ShieldCheck className="w-3.5 h-3.5" />
-          <span>System Status & Free Tier Audit</span>
-        </div>
-        <h1 className="text-3xl font-extrabold text-slate-900 dark:text-slate-100">
-          Transparency & Infrastructure Health
-        </h1>
-        <p className="text-sm text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
-          Real-time verification of Research Hub&apos;s external services, rate-limit policies, and zero-cost billing guarantees.
-        </p>
-      </div>
+    <div className="mx-auto max-w-5xl space-y-10 px-4 py-10 sm:px-6 lg:px-8">
+      <header className="max-w-2xl space-y-3">
+        <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-indigo-700 dark:text-indigo-300"><Activity className="h-4 w-4" /> Service status</p>
+        <h1 className="font-serif text-3xl tracking-tight text-slate-950 dark:text-white sm:text-4xl">What the app can verify</h1>
+        <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">This page checks the OpenAlex endpoint from your browser and reports whether an OpenRouter key is configured on this server. Provider availability and quotas can change independently.</p>
+      </header>
 
-      {/* Services Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {/* OpenAlex */}
-        <div className="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400">
-                <Server className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                  OpenAlex API
-                </h3>
-                <span className="text-xs text-slate-500">Primary Scholarly Catalog</span>
-              </div>
-            </div>
-            <span
-              className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full ${
-                openAlexStatus === "online"
-                  ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
-                  : openAlexStatus === "checking"
-                  ? "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
-                  : "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300"
-              }`}
-            >
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              {openAlexStatus === "online" ? `Online (${openAlexLatency}ms)` : openAlexStatus}
-            </span>
-          </div>
-          <div className="text-xs text-slate-600 dark:text-slate-300 space-y-1">
-            <p>• Free Quota: 100,000 requests/day unauthenticated</p>
-            <p>• Polite Pool Rate: 10 req/sec via email header</p>
-            <p>• Cost: Permanently $0.00 (Public domain CC0)</p>
-          </div>
-        </div>
+      <section aria-label="Service status" className="divide-y divide-slate-200 border-y border-slate-200 dark:divide-slate-800 dark:border-slate-800">
+        <article className="grid gap-4 py-6 sm:grid-cols-[1fr_auto] sm:items-center">
+          <div className="flex gap-4"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300"><Server className="h-5 w-5" /></span><div><h2 className="text-sm font-semibold text-slate-900 dark:text-white">OpenAlex</h2><p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Scholarly works and author metadata used in discovery.</p><a className="mt-2 inline-flex items-center gap-1 text-xs text-indigo-700 hover:underline dark:text-indigo-300" href="https://docs.openalex.org/" target="_blank" rel="noopener noreferrer">Provider documentation <ExternalLink className="h-3 w-3" /></a></div></div>
+          <span className={`inline-flex w-fit items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${statusStyle(openAlex.state)}`}>{openAlex.state === "online" ? <CheckCircle2 className="h-3.5 w-3.5" /> : openAlex.state === "checking" ? <Clock className="h-3.5 w-3.5" /> : <AlertCircle className="h-3.5 w-3.5" />}{openAlex.state === "online" ? `Responding${openAlex.latency !== undefined ? ` · ${openAlex.latency} ms` : ""}` : openAlex.state === "checking" ? "Checking" : "Could not reach service"}</span>
+        </article>
 
-        {/* arXiv API */}
-        <div className="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400">
-                <Zap className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                  arXiv API
-                </h3>
-                <span className="text-xs text-slate-500">Preprints & Open Access PDFs</span>
-              </div>
-            </div>
-            <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              Operational
-            </span>
-          </div>
-          <div className="text-xs text-slate-600 dark:text-slate-300 space-y-1">
-            <p>• Policy: Maximum 1 request every 3 seconds</p>
-            <p>• Safeguard: Client-side and server-side request throttling</p>
-            <p>• Cost: Permanently $0.00 (Cornell University)</p>
-          </div>
-        </div>
+        <article className="grid gap-4 py-6 sm:grid-cols-[1fr_auto] sm:items-center">
+          <div className="flex gap-4"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-violet-50 text-violet-700 dark:bg-violet-950/50 dark:text-violet-300"><Activity className="h-5 w-5" /></span><div><h2 className="text-sm font-semibold text-slate-900 dark:text-white">arXiv and Crossref</h2><p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Connected as search and publication metadata sources. This page does not perform separate uptime checks for these providers.</p></div></div>
+          <span className="w-fit rounded-full border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-600 dark:border-slate-700 dark:text-slate-300">Integration available</span>
+        </article>
 
-        {/* OpenRouter AI */}
-        <div className="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-pink-50 dark:bg-pink-950/60 text-pink-600 dark:text-pink-400">
-                <Cpu className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                  OpenRouter AI
-                </h3>
-                <span className="text-xs text-slate-500">Optional Companion Layer</span>
-              </div>
-            </div>
-            <span
-              className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full ${
-                aiStatus?.isConfigured
-                  ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800"
-                  : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
-              }`}
-            >
-              {aiStatus?.isConfigured ? "Active (Free Model)" : "Zero-Cost Standby"}
-            </span>
-          </div>
-          <div className="text-xs text-slate-600 dark:text-slate-300 space-y-1">
-            <p>• Current Model: <code className="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded font-mono">{aiStatus?.model || "meta-llama/llama-3.3-70b-instruct:free"}</code></p>
-            <p>• Safeguard: Hard-blocked from paid models; 500 token limit; 20 req/hr per IP rate limit</p>
-            <p>• Cost: Permanently $0.00 (Free model routing only)</p>
-          </div>
-        </div>
-
-        {/* Vercel Hobby Hosting */}
-        <div className="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-cyan-50 dark:bg-cyan-950/60 text-cyan-600 dark:text-cyan-400">
-                <Cloud className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                  Vercel Hobby Hosting
-                </h3>
-                <span className="text-xs text-slate-500">Edge & Next.js Serverless</span>
-              </div>
-            </div>
-            <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              Hobby Tier Active
-            </span>
-          </div>
-          <div className="text-xs text-slate-600 dark:text-slate-300 space-y-1">
-            <p>• Allowance: 100 GB Bandwidth/mo, 100 GB-hrs serverless execution</p>
-            <p>• Safeguard: Hard cap with zero overage billing; edge caching enabled</p>
-            <p>• Cost: $0.00 (Personal/non-commercial open source)</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Free Tier Checklist */}
-      <section className="p-6 sm:p-8 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-        <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-          <ShieldCheck className="w-5 h-5 text-emerald-600" />
-          Mandatory Zero-Cost Compliance Verification
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-slate-700 dark:text-slate-300">
-          <div className="flex items-start gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-            <span><strong>No Paid AI Fallback:</strong> Rejects paid models; returns friendly error if free model is busy.</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-            <span><strong>No Secret Exposure:</strong> All environment variables stored server-side only; .env never tracked.</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-            <span><strong>Zero Mandatory Database:</strong> Core research discovery operates anonymously without Supabase.</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-            <span><strong>No Paid Vector Embeddings:</strong> Lexical and topic queries are handled by open upstream APIs.</span>
-          </div>
-        </div>
+        <article className="grid gap-4 py-6 sm:grid-cols-[1fr_auto] sm:items-center">
+          <div className="flex gap-4"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200"><Cpu className="h-5 w-5" /></span><div><h2 className="text-sm font-semibold text-slate-900 dark:text-white">OpenRouter AI companion</h2><p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Optional. A configured key enables requests; this check does not send a prompt or confirm model availability.</p><p className="mt-2 font-mono text-xs text-slate-500 dark:text-slate-400">Model: {aiStatus?.model || "Checking configuration"}</p></div></div>
+          <span className={`w-fit rounded-full border px-2.5 py-1 text-xs font-medium ${aiStatus?.isConfigured ? "border-indigo-200 bg-indigo-50 text-indigo-800 dark:border-indigo-900 dark:bg-indigo-950/40 dark:text-indigo-200" : "border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-300"}`}>{aiStatus ? aiStatus.isConfigured ? "Key configured" : "Not configured" : "Checking"}</span>
+        </article>
       </section>
+
+      <p className="max-w-3xl text-xs leading-5 text-slate-500 dark:text-slate-400">Search and library features use public provider endpoints and local browser storage. Third-party service terms, rate limits, availability, and any configured AI model may change. See each provider’s current documentation for its policies.</p>
     </div>
   );
 }

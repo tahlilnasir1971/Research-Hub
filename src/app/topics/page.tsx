@@ -109,7 +109,7 @@ export default function TopicsPage() {
           Scientific Disciplines & Research Topics
         </h1>
         <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-          Navigate 250M+ scientific publications indexed from OpenAlex, arXiv, and Crossref. Click on any research domain or subfield to explore relevant peer-reviewed works and preprints.
+          Browse fields and subfields, then open a live search across the connected scholarly sources.
         </p>
       </div>
 

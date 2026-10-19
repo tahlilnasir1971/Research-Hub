@@ -3,265 +3,72 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import {
-  Search,
-  BookOpenCheck,
-  Sparkles,
-  ShieldCheck,
-  FileText,
-  Cpu,
-  Dna,
-  Atom,
-  Stethoscope,
-  Globe2,
-  Calculator,
-  ArrowRight,
-  Quote,
-} from "lucide-react";
+import { ArrowRight, Atom, BookOpen, Calculator, Cpu, Dna, Globe2, Search, Stethoscope } from "lucide-react";
 
-const SUGGESTED_QUERIES = [
-  "Quantum Computing",
-  "Large Language Models",
-  "CRISPR Gene Editing",
-  "Renewable Energy Storage",
-  "Dark Matter",
-  "Neuroplasticity",
-];
+const SUGGESTED_QUERIES = ["Optimization", "Large language models", "Quantum computing", "Climate modeling", "Computational biology"];
 
 const DISCIPLINES = [
-  {
-    name: "Computer Science",
-    icon: Cpu,
-    query: "computer science machine learning algorithms",
-    count: "35M+ works",
-    color: "from-blue-500/10 to-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-900",
-  },
-  {
-    name: "Biology & Genetics",
-    icon: Dna,
-    query: "genomics molecular biology genetics",
-    count: "40M+ works",
-    color: "from-emerald-500/10 to-teal-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900",
-  },
-  {
-    name: "Physics & Astronomy",
-    icon: Atom,
-    query: "astrophysics quantum mechanics condensed matter",
-    count: "28M+ works",
-    color: "from-purple-500/10 to-pink-500/10 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-900",
-  },
-  {
-    name: "Medicine & Health",
-    icon: Stethoscope,
-    query: "clinical trials oncology immunology",
-    count: "50M+ works",
-    color: "from-rose-500/10 to-orange-500/10 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900",
-  },
-  {
-    name: "Climate & Earth",
-    icon: Globe2,
-    query: "climate change ecology geoscience",
-    count: "18M+ works",
-    color: "from-cyan-500/10 to-sky-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-200 dark:border-cyan-900",
-  },
-  {
-    name: "Mathematics",
-    icon: Calculator,
-    query: "algebra topology applied mathematics",
-    count: "12M+ works",
-    color: "from-amber-500/10 to-yellow-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-900",
-  },
+  { name: "Computer science & AI", icon: Cpu, query: "computer science machine learning algorithms", color: "text-indigo-600 bg-indigo-50 dark:text-indigo-300 dark:bg-indigo-950/40" },
+  { name: "Physics & astronomy", icon: Atom, query: "astrophysics quantum mechanics condensed matter", color: "text-violet-600 bg-violet-50 dark:text-violet-300 dark:bg-violet-950/40" },
+  { name: "Biology & genetics", icon: Dna, query: "genomics molecular biology genetics", color: "text-emerald-700 bg-emerald-50 dark:text-emerald-300 dark:bg-emerald-950/40" },
+  { name: "Medicine & health", icon: Stethoscope, query: "clinical trials oncology immunology", color: "text-rose-700 bg-rose-50 dark:text-rose-300 dark:bg-rose-950/40" },
+  { name: "Climate & earth science", icon: Globe2, query: "climate change ecology geoscience", color: "text-sky-700 bg-sky-50 dark:text-sky-300 dark:bg-sky-950/40" },
+  { name: "Mathematics", icon: Calculator, query: "algebra topology applied mathematics", color: "text-amber-700 bg-amber-50 dark:text-amber-300 dark:bg-amber-950/40" },
 ];
 
 export default function HomePage() {
   const [query, setQuery] = useState("");
   const router = useRouter();
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (query.trim()) {
-      router.push(`/search?q=${encodeURIComponent(query.trim())}`);
-    }
+  const search = (value: string) => {
+    if (value.trim()) router.push(`/search?q=${encodeURIComponent(value.trim())}`);
   };
 
   return (
-    <div className="space-y-20 pb-16">
-      {/* Hero Section */}
-      <section className="relative pt-12 pb-16 sm:pt-20 sm:pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 mb-6 animate-in fade-in slide-in-from-bottom-2">
-          <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-          <span>Zero-Cost Open Scholarly Discovery Platform</span>
-        </div>
-
-        <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 max-w-4xl mx-auto leading-tight">
-          Explore Scientific Knowledge{" "}
-          <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-            Without Paywalls
-          </span>
-        </h1>
-
-        <p className="mt-5 text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
-          Search over 250 million research papers, preprints, and open-access publications powered by OpenAlex, arXiv, and Crossref with $0 subscription cost.
-        </p>
-
-        {/* Search Input Box */}
-        <div className="mt-8 max-w-2xl mx-auto">
-          <form
-            onSubmit={handleSearch}
-            className="relative flex items-center shadow-xl rounded-2xl bg-white dark:bg-slate-900 border-2 border-indigo-500/20 focus-within:border-indigo-600 transition-all p-2"
-          >
-            <Search className="w-5 h-5 text-slate-400 ml-3 shrink-0" />
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search by keywords, title, author, or DOI..."
-              className="w-full px-3 py-2 text-sm sm:text-base bg-transparent text-slate-900 dark:text-slate-100 focus:outline-none placeholder:text-slate-400"
-            />
-            <button
-              type="submit"
-              className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-md transition-all shrink-0 flex items-center gap-1.5"
-            >
-              <span>Search</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </form>
-
-          {/* Quick Suggestions */}
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-xs text-slate-500">
-            <span className="font-medium text-slate-400">Popular:</span>
-            {SUGGESTED_QUERIES.map((q) => (
-              <button
-                key={q}
-                onClick={() => router.push(`/search?q=${encodeURIComponent(q)}`)}
-                className="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 border border-slate-200 dark:border-slate-700 transition-colors"
-              >
-                {q}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Value Highlights */}
-        <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto text-left">
-          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-2">
-            <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 flex items-center justify-center text-emerald-600">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-              100% Zero-Cost Guarantee
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              Never pay for search or discovery. Built on verified free tiers with documented zero billing exposure.
-            </p>
-          </div>
-
-          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-2">
-            <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center text-indigo-600">
-              <Quote className="w-5 h-5" />
-            </div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-              Instant Citation Export
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              Generate one-click BibTeX, APA, MLA, and RIS citations computed client-side at $0 cost.
-            </p>
-          </div>
-
-          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-2">
-            <div className="w-9 h-9 rounded-xl bg-purple-50 dark:bg-purple-950/50 flex items-center justify-center text-purple-600">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-              Optional Free-Tier AI
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              Connect OpenRouter with free models (:free) for plain-language summaries. Fully optional, never breaks search.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Explore Disciplines */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+    <div className="pb-16">
+      <section className="mx-auto max-w-6xl px-4 pb-16 pt-14 sm:px-6 sm:pb-24 sm:pt-24 lg:px-8">
+        <div className="grid gap-12 lg:grid-cols-[1.15fr_.85fr] lg:items-center">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-              Browse by Scientific Discipline
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-              Explore curated literature across foundational and emerging fields.
-            </p>
-          </div>
-          <Link
-            href="/topics"
-            className="text-xs sm:text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
-          >
-            <span>View All Topics</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
+            <p className="mb-5 text-xs font-semibold uppercase tracking-[0.18em] text-indigo-700 dark:text-indigo-300">Research, with room to think</p>
+            <h1 className="max-w-2xl font-serif text-4xl leading-[1.08] tracking-tight text-slate-950 dark:text-white sm:text-6xl">Find the work that moves your question forward.</h1>
+            <p className="mt-6 max-w-xl text-base leading-7 text-slate-600 dark:text-slate-300 sm:text-lg">Search scholarly literature across OpenAlex, arXiv, and Crossref. Follow a topic into its papers, authors, and ideas.</p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {DISCIPLINES.map((d) => {
-            const Icon = d.icon;
-            return (
-              <Link
-                key={d.name}
-                href={`/search?q=${encodeURIComponent(d.query)}`}
-                className={`group p-6 rounded-2xl bg-gradient-to-br ${d.color} border hover:shadow-md transition-all duration-200 flex flex-col justify-between`}
-              >
-                <div className="space-y-3">
-                  <div className="w-10 h-10 rounded-xl bg-white dark:bg-slate-900 shadow-sm flex items-center justify-center">
-                    <Icon className="w-5 h-5" />
-                  </div>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                    {d.name}
-                  </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {d.count}
-                  </p>
-                </div>
-                <div className="mt-4 pt-3 border-t border-slate-200/40 dark:border-slate-800/60 flex items-center justify-between text-xs font-semibold">
-                  <span>Explore research</span>
-                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </Link>
-            );
-          })}
+            <form onSubmit={(event) => { event.preventDefault(); search(query); }} className="mt-8 flex rounded-xl border border-slate-300 bg-white p-1.5 shadow-sm transition focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-500/10 dark:border-slate-700 dark:bg-slate-900">
+              <label className="sr-only" htmlFor="research-query">Search papers, topics, authors, or DOI</label>
+              <Search aria-hidden="true" className="ml-3 h-5 w-5 shrink-0 self-center text-slate-400" />
+              <input id="research-query" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search papers, topics, authors, or DOI" className="min-w-0 flex-1 bg-transparent px-3 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 dark:text-white" />
+              <button type="submit" className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-indigo-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Search <ArrowRight className="h-4 w-4" /></button>
+            </form>
+
+            <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+              <span className="mr-1">Explore:</span>
+              {SUGGESTED_QUERIES.map((item) => <button key={item} onClick={() => search(item)} className="rounded-full border border-slate-200 px-3 py-1.5 transition hover:border-indigo-300 hover:text-indigo-700 dark:border-slate-700 dark:hover:border-indigo-700 dark:hover:text-indigo-300">{item}</button>)}
+            </div>
+          </div>
+
+          <aside className="border-l border-slate-200 pl-6 dark:border-slate-800 sm:pl-8">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">A research workspace</p>
+            <div className="mt-6 space-y-6">
+              <div className="flex gap-4"><span className="font-serif text-2xl text-indigo-700 dark:text-indigo-300">01</span><div><h2 className="text-sm font-semibold text-slate-900 dark:text-white">Discover literature</h2><p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-400">Search and filter scholarly records from public research sources.</p></div></div>
+              <div className="flex gap-4"><span className="font-serif text-2xl text-indigo-700 dark:text-indigo-300">02</span><div><h2 className="text-sm font-semibold text-slate-900 dark:text-white">Keep useful papers close</h2><p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-400">Save papers to a library stored in this browser, with citation export.</p></div></div>
+              <div className="flex gap-4"><span className="font-serif text-2xl text-indigo-700 dark:text-indigo-300">03</span><div><h2 className="text-sm font-semibold text-slate-900 dark:text-white">Ask better questions</h2><p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-400">Use the optional AI companion for abstract-based explanations when configured.</p></div></div>
+            </div>
+            <Link href="/topics" className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-indigo-700 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-200">Browse research topics <ArrowRight className="h-4 w-4" /></Link>
+          </aside>
         </div>
       </section>
 
-      {/* Free Tier Compliance Callout */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="p-8 rounded-3xl bg-slate-900 text-white relative overflow-hidden shadow-xl">
-          <div className="max-w-2xl space-y-4">
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-400">
-              <ShieldCheck className="w-4 h-4" />
-              Verified Zero-Cost Infrastructure
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold">
-              Built to operate forever within free quotas
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Research Hub adheres strictly to a zero-cost architecture mandate. We evaluate all API quotas, maintain no paid fallbacks, store no secrets client-side, and run on Vercel&apos;s generous Hobby tier connected to GitHub.
-            </p>
-            <div className="pt-2 flex flex-wrap items-center gap-3">
-              <Link
-                href="/status"
-                className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 text-xs font-bold rounded-xl transition-colors shadow-sm"
-              >
-                Read Free Tier Audit
-              </Link>
-              <Link
-                href="/search"
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold rounded-xl transition-colors"
-              >
-                Start Searching
-              </Link>
-            </div>
+      <section className="border-y border-slate-200 bg-white/70 py-14 dark:border-slate-800 dark:bg-slate-900/40 sm:py-16">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">Explore by field</p><h2 className="mt-2 font-serif text-3xl tracking-tight text-slate-950 dark:text-white">Start with a discipline</h2></div><p className="max-w-md text-sm leading-6 text-slate-600 dark:text-slate-400">Choose a broad area to open a live search. Results come from the connected scholarly sources.</p></div>
+          <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {DISCIPLINES.map(({ name, icon: Icon, query: disciplineQuery, color }) => <Link key={name} href={`/search?q=${encodeURIComponent(disciplineQuery)}`} className="group flex items-center justify-between gap-4 border border-slate-200 bg-white p-4 transition hover:border-indigo-300 hover:shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:hover:border-indigo-800"><span className="flex items-center gap-3"><span className={`flex h-10 w-10 items-center justify-center rounded-lg ${color}`}><Icon className="h-5 w-5" /></span><span className="text-sm font-semibold text-slate-800 dark:text-slate-100">{name}</span></span><ArrowRight className="h-4 w-4 text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-indigo-600" /></Link>)}
           </div>
         </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
+        <div className="flex flex-col gap-5 border-l-2 border-indigo-600 pl-5 sm:flex-row sm:items-center sm:justify-between sm:pl-7"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">Keep your reading organized</p><h2 className="mt-2 font-serif text-2xl text-slate-950 dark:text-white">Build a library around your questions.</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-400">Save papers in this browser, revisit their source records, and export references in BibTeX.</p></div><Link href="/library" className="inline-flex shrink-0 items-center gap-2 self-start rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-indigo-400 hover:text-indigo-700 dark:border-slate-700 dark:text-slate-200 dark:hover:text-indigo-300 sm:self-auto"><BookOpen className="h-4 w-4" /> Open library</Link></div>
       </section>
     </div>
   );
