@@ -3,17 +3,18 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowRight, Atom, BookOpen, Calculator, Cpu, Dna, Globe2, Search, Stethoscope } from "lucide-react";
+import { ArrowRight, Atom, BookOpen, Calculator, Cpu, Dna, Globe2, Search, Stethoscope, Brain, Briefcase } from "lucide-react";
 
-const SUGGESTED_QUERIES = ["Optimization", "Large language models", "Quantum computing", "Climate modeling", "Computational biology"];
+const SUGGESTED_QUERIES = ["Optimization", "Cognitive psychology", "Large language models", "Quantum computing", "Climate modeling", "Neuroscience"];
 
 const DISCIPLINES = [
-  { name: "Computer science & AI", icon: Cpu, query: "computer science machine learning algorithms", color: "text-indigo-600 bg-indigo-50 dark:text-indigo-300 dark:bg-indigo-950/40" },
-  { name: "Physics & astronomy", icon: Atom, query: "astrophysics quantum mechanics condensed matter", color: "text-violet-600 bg-violet-50 dark:text-violet-300 dark:bg-violet-950/40" },
-  { name: "Biology & genetics", icon: Dna, query: "genomics molecular biology genetics", color: "text-emerald-700 bg-emerald-50 dark:text-emerald-300 dark:bg-emerald-950/40" },
-  { name: "Medicine & health", icon: Stethoscope, query: "clinical trials oncology immunology", color: "text-rose-700 bg-rose-50 dark:text-rose-300 dark:bg-rose-950/40" },
-  { name: "Climate & earth science", icon: Globe2, query: "climate change ecology geoscience", color: "text-sky-700 bg-sky-50 dark:text-sky-300 dark:bg-sky-950/40" },
-  { name: "Mathematics", icon: Calculator, query: "algebra topology applied mathematics", color: "text-amber-700 bg-amber-50 dark:text-amber-300 dark:bg-amber-950/40" },
+  { name: "Psychology & cognitive sciences", icon: Brain, query: "cognitive psychology neuroscience behavioral decision making", opportunityField: "Psychology", color: "text-purple-600 bg-purple-50 dark:text-purple-300 dark:bg-purple-950/40" },
+  { name: "Computer science & AI", icon: Cpu, query: "computer science machine learning algorithms", opportunityField: "Artificial Intelligence", color: "text-indigo-600 bg-indigo-50 dark:text-indigo-300 dark:bg-indigo-950/40" },
+  { name: "Mathematics", icon: Calculator, query: "algebra topology applied mathematics optimization", opportunityField: "Mathematics", color: "text-amber-700 bg-amber-50 dark:text-amber-300 dark:bg-amber-950/40" },
+  { name: "Physics & astronomy", icon: Atom, query: "astrophysics quantum mechanics condensed matter", opportunityField: "Computational Science", color: "text-violet-600 bg-violet-50 dark:text-violet-300 dark:bg-violet-950/40" },
+  { name: "Biology & genetics", icon: Dna, query: "genomics molecular biology genetics", opportunityField: "Interdisciplinary", color: "text-emerald-700 bg-emerald-50 dark:text-emerald-300 dark:bg-emerald-950/40" },
+  { name: "Medicine & health", icon: Stethoscope, query: "clinical trials oncology immunology psychiatry", opportunityField: "Psychology", color: "text-rose-700 bg-rose-50 dark:text-rose-300 dark:bg-rose-950/40" },
+  { name: "Climate & earth science", icon: Globe2, query: "climate change ecology geoscience", opportunityField: "Computational Science", color: "text-sky-700 bg-sky-50 dark:text-sky-300 dark:bg-sky-950/40" },
 ];
 
 export default function HomePage() {
@@ -31,7 +32,7 @@ export default function HomePage() {
           <div>
             <p className="mb-5 text-xs font-semibold uppercase tracking-[0.18em] text-indigo-700 dark:text-indigo-300">Research, with room to think</p>
             <h1 className="max-w-2xl font-serif text-4xl leading-[1.08] tracking-tight text-slate-950 dark:text-white sm:text-6xl">Find the work that moves your question forward.</h1>
-            <p className="mt-6 max-w-xl text-base leading-7 text-slate-600 dark:text-slate-300 sm:text-lg">Search scholarly literature across OpenAlex, arXiv, and Crossref. Follow a topic into its papers, authors, and ideas.</p>
+            <p className="mt-6 max-w-xl text-base leading-7 text-slate-600 dark:text-slate-300 sm:text-lg">Search scholarly literature across OpenAlex, arXiv, and Crossref. Discover papers, authors, and discipline-aware research opportunities.</p>
 
             <form onSubmit={(event) => { event.preventDefault(); search(query); }} className="mt-8 flex rounded-xl border border-slate-300 bg-white p-1.5 shadow-sm transition focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-500/10 dark:border-slate-700 dark:bg-slate-900">
               <label className="sr-only" htmlFor="research-query">Search papers, topics, authors, or DOI</label>
@@ -50,19 +51,40 @@ export default function HomePage() {
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">A research workspace</p>
             <div className="mt-6 space-y-6">
               <div className="flex gap-4"><span className="font-serif text-2xl text-indigo-700 dark:text-indigo-300">01</span><div><h2 className="text-sm font-semibold text-slate-900 dark:text-white">Discover literature</h2><p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-400">Search and filter scholarly records from public research sources.</p></div></div>
-              <div className="flex gap-4"><span className="font-serif text-2xl text-indigo-700 dark:text-indigo-300">02</span><div><h2 className="text-sm font-semibold text-slate-900 dark:text-white">Keep useful papers close</h2><p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-400">Save papers to a library stored in this browser, with citation export.</p></div></div>
+              <div className="flex gap-4"><span className="font-serif text-2xl text-indigo-700 dark:text-indigo-300">02</span><div><h2 className="text-sm font-semibold text-slate-900 dark:text-white">Find research opportunities</h2><p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-400">Explore verified research assistantships, lab openings, and fellowships adapted to your field.</p></div></div>
               <div className="flex gap-4"><span className="font-serif text-2xl text-indigo-700 dark:text-indigo-300">03</span><div><h2 className="text-sm font-semibold text-slate-900 dark:text-white">Ask better questions</h2><p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-400">Use the optional AI companion for abstract-based explanations when configured.</p></div></div>
             </div>
-            <Link href="/topics" className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-indigo-700 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-200">Browse research topics <ArrowRight className="h-4 w-4" /></Link>
+            <div className="mt-7 flex flex-wrap gap-4">
+              <Link href="/topics" className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-700 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-200">Browse topics <ArrowRight className="h-4 w-4" /></Link>
+              <Link href="/opportunities" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"><Briefcase className="h-4 w-4" /> View opportunities</Link>
+            </div>
           </aside>
         </div>
       </section>
 
       <section className="border-y border-slate-200 bg-white/70 py-14 dark:border-slate-800 dark:bg-slate-900/40 sm:py-16">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">Explore by field</p><h2 className="mt-2 font-serif text-3xl tracking-tight text-slate-950 dark:text-white">Start with a discipline</h2></div><p className="max-w-md text-sm leading-6 text-slate-600 dark:text-slate-400">Choose a broad area to open a live search. Results come from the connected scholarly sources.</p></div>
+          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">Explore by field</p><h2 className="mt-2 font-serif text-3xl tracking-tight text-slate-950 dark:text-white">Start with a discipline</h2></div><p className="max-w-md text-sm leading-6 text-slate-600 dark:text-slate-400">Choose a broad area to search papers or view academic opportunities in that field.</p></div>
           <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {DISCIPLINES.map(({ name, icon: Icon, query: disciplineQuery, color }) => <Link key={name} href={`/search?q=${encodeURIComponent(disciplineQuery)}`} className="group flex items-center justify-between gap-4 border border-slate-200 bg-white p-4 transition hover:border-indigo-300 hover:shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:hover:border-indigo-800"><span className="flex items-center gap-3"><span className={`flex h-10 w-10 items-center justify-center rounded-lg ${color}`}><Icon className="h-5 w-5" /></span><span className="text-sm font-semibold text-slate-800 dark:text-slate-100">{name}</span></span><ArrowRight className="h-4 w-4 text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-indigo-600" /></Link>)}
+            {DISCIPLINES.map(({ name, icon: Icon, query: disciplineQuery, color, opportunityField }) => (
+              <div key={name} className="group flex flex-col justify-between gap-3 border border-slate-200 bg-white p-4 transition hover:border-indigo-300 hover:shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:hover:border-indigo-800 rounded-xl">
+                <Link href={`/search?q=${encodeURIComponent(disciplineQuery)}`} className="flex items-center justify-between gap-3">
+                  <span className="flex items-center gap-3">
+                    <span className={`flex h-10 w-10 items-center justify-center rounded-lg ${color}`}><Icon className="h-5 w-5" /></span>
+                    <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">{name}</span>
+                  </span>
+                  <ArrowRight className="h-4 w-4 text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-indigo-600" />
+                </Link>
+                {opportunityField && (
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs">
+                    <Link href={`/opportunities?discipline=${encodeURIComponent(opportunityField)}`} className="text-[11px] font-medium text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 inline-flex items-center gap-1">
+                      <span>{opportunityField} opportunities</span>
+                      <ArrowRight className="h-3 w-3" />
+                    </Link>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </section>
