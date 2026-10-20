@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { BookOpenCheck, Bookmark, Compass, Menu, Search, X } from "lucide-react";
+import { BookOpenCheck, Bookmark, Compass, Menu, Search, X, Briefcase } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 
 const navLinks = [
   { href: "/search", label: "Search", icon: Search },
   { href: "/topics", label: "Topics", icon: Compass },
+  { href: "/opportunities", label: "Opportunities", icon: Briefcase },
   { href: "/library", label: "Library", icon: Bookmark },
   { href: "/status", label: "Status", icon: null },
 ];
@@ -17,7 +18,7 @@ export function Navbar() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const linkClass = (href: string) => `inline-flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors ${pathname === href || (href !== "/" && pathname.startsWith(href)) ? "text-indigo-700 dark:text-indigo-300" : "text-slate-600 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white"}`;
+  const linkClass = (href: string) => `inline-flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors ${pathname === href || (href !== "/" && pathname.startsWith(href)) ? "text-indigo-700 dark:text-indigo-300 font-semibold" : "text-slate-600 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white"}`;
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur dark:border-slate-800/80 dark:bg-slate-950/95">

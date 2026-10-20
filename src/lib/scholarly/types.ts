@@ -71,3 +71,13 @@ export interface TopicSummary {
   worksCount: number;
   description: string;
 }
+
+export interface AuthorSearchResult {
+  authors: AuthorProfile[];
+  totalCount: number;
+  page: number;
+  perPage: number;
+  query: string;
+  provider: string;
+}
+

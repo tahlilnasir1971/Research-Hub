@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { explainPaperWithAi } from "@/lib/ai/openrouter";
+import { explainPaperWithAi, AnalysisMode } from "@/lib/ai/openrouter";
 
 export const dynamic = "force-dynamic";
+
+const VALID_MODES: AnalysisMode[] = ["overview", "methodology", "critical_evaluation", "roadmap", "qa"];
 
 export async function POST(req: NextRequest) {
   const contentLength = Number(req.headers.get("content-length") || 0);
@@ -17,9 +19,14 @@ export async function POST(req: NextRequest) {
     if (!body || typeof body !== "object" || Array.isArray(body)) {
       return NextResponse.json({ error: "Send a paper title, abstract, and optional question as a JSON object." }, { status: 400 });
     }
-    const { title, abstract, question } = body as Record<string, unknown>;
+    const { title, abstract, question, mode } = body as Record<string, unknown>;
     if ((title !== undefined && typeof title !== "string") || (abstract !== undefined && typeof abstract !== "string") || (question !== undefined && typeof question !== "string")) {
       return NextResponse.json({ error: "Title, abstract, and question must be text." }, { status: 400 });
+    }
+
+    let validatedMode: AnalysisMode | undefined = undefined;
+    if (typeof mode === "string" && VALID_MODES.includes(mode as AnalysisMode)) {
+      validatedMode = mode as AnalysisMode;
     }
 
     const forwarded = req.headers.get("x-forwarded-for");
@@ -29,6 +36,7 @@ export async function POST(req: NextRequest) {
       title,
       abstract,
       question,
+      mode: validatedMode,
       clientIp,
     });
 

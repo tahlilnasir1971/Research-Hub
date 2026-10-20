@@ -1,4 +1,4 @@
-import { Paper, SearchFilters, SearchResult, AuthorProfile, Topic } from "./types";
+import { Paper, SearchFilters, SearchResult, AuthorProfile, AuthorSearchResult, Topic } from "./types";
 
 const BASE_URL = "https://api.openalex.org";
 
@@ -223,3 +223,55 @@ export async function getOpenAlexAuthor(authorId: string): Promise<AuthorProfile
     topWorks,
   };
 }
+
+export async function searchOpenAlexAuthors(
+  query: string,
+  page = 1,
+  perPage = 12
+): Promise<AuthorSearchResult> {
+  const url = new URL(`${BASE_URL}/authors`);
+  if (query.trim()) {
+    url.searchParams.set("search", query.trim());
+  }
+  url.searchParams.set("page", page.toString());
+  url.searchParams.set("per_page", perPage.toString());
+
+  const res = await fetch(url.toString(), {
+    headers: getHeaders(),
+    next: { revalidate: 3600 },
+  });
+
+  if (!res.ok) {
+    throw new Error(`OpenAlex authors API error: status ${res.status}`);
+  }
+
+  const data = await res.json();
+  const authors: AuthorProfile[] = (data.results || []).map((author: any) => {
+    const cleanId = author.id?.replace("https://openalex.org/", "") || "";
+    const affiliation =
+      author.last_known_institution?.display_name ||
+      author.affiliations?.[0]?.institution?.display_name ||
+      undefined;
+
+    return {
+      id: cleanId,
+      name: author.display_name || "Unknown Author",
+      affiliation,
+      worksCount: author.works_count || 0,
+      citationCount: author.cited_by_count || 0,
+      hIndex: author.summary_stats?.h_index || 0,
+      orcid: author.orcid,
+      topWorks: [],
+    };
+  });
+
+  return {
+    authors,
+    totalCount: data.meta?.count || authors.length,
+    page,
+    perPage,
+    query,
+    provider: "OpenAlex (Verified Academic Authority)",
+  };
+}
+

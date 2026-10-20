@@ -10,6 +10,9 @@ import {
   ArrowLeft,
   Calendar,
   Building,
+  CheckCircle2,
+  AlertCircle,
+  FileQuestion,
 } from "lucide-react";
 import { unifiedGetPaper } from "@/lib/scholarly/aggregator";
 import { formatNumber } from "@/lib/utils";
@@ -35,6 +38,33 @@ export default async function PaperDetailPage({ params }: { params: { id: string
     notFound();
   }
 
+  // Determine truthful content availability level
+  const contentStatus = paper.openAccessUrl
+    ? {
+        level: "full_text_available",
+        badge: "Open Access Full-Text PDF Available",
+        badgeColor: "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300",
+        icon: CheckCircle2,
+        description: "A publicly accessible full-text PDF is indexed for this work. You can open the reader or download the document directly.",
+      }
+    : paper.abstract
+    ? {
+        level: "abstract_available",
+        badge: "Abstract & Metadata Available",
+        badgeColor: "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-300",
+        icon: AlertCircle,
+        description: "The published abstract and citation metadata are available. Full text is not indexed in the open record; consult the publisher link for licensed access.",
+      }
+    : {
+        level: "metadata_only",
+        badge: "Bibliographic Metadata Only",
+        badgeColor: "border-slate-300 bg-slate-100 text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300",
+        icon: FileQuestion,
+        description: "Only citation and publication identifiers are indexed. Abstract and full-text are inaccessible through public endpoints.",
+      };
+
+  const StatusIcon = contentStatus.icon;
+
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
       {/* Navigation Top */}
@@ -44,14 +74,14 @@ export default async function PaperDetailPage({ params }: { params: { id: string
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          Back to Paper Search
+          Back to Literature Search
         </Link>
       </div>
 
       {/* Main Header */}
       <header className="space-y-4">
         <div className="flex flex-wrap items-center gap-2 text-xs">
-          <span className="font-bold text-indigo-600 dark:text-indigo-400">
+          <span className="font-bold text-indigo-700 dark:text-indigo-300">
             {paper.publicationYear}
           </span>
 
@@ -65,16 +95,6 @@ export default async function PaperDetailPage({ params }: { params: { id: string
             </>
           )}
 
-          {paper.isOpenAccess && (
-            <>
-              <span className="text-slate-400">•</span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                <Globe className="w-3.5 h-3.5 text-emerald-600" />
-                Open Access PDF Available
-              </span>
-            </>
-          )}
-
           {paper.citationCount > 0 && (
             <>
               <span className="text-slate-400">•</span>
@@ -84,9 +104,14 @@ export default async function PaperDetailPage({ params }: { params: { id: string
               </span>
             </>
           )}
+
+          <span className={`inline-flex items-center gap-1 rounded border px-2 py-0.5 text-xs font-medium ${contentStatus.badgeColor}`}>
+            <StatusIcon className="h-3 w-3 shrink-0" />
+            {contentStatus.badge}
+          </span>
         </div>
 
-        <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-tight">
+        <h1 className="font-serif text-3xl sm:text-5xl font-bold text-slate-950 dark:text-white tracking-tight leading-tight">
           {paper.title}
         </h1>
 
@@ -99,17 +124,17 @@ export default async function PaperDetailPage({ params }: { params: { id: string
             {paper.authors.map((author, idx) => (
               <div
                 key={idx}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 shadow-sm"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 shadow-sm"
               >
                 {author.id ? (
                   <Link
                     href={`/author/${encodeURIComponent(author.id)}`}
-                    className="font-semibold hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline"
+                    className="font-semibold text-slate-900 dark:text-white hover:text-indigo-700 dark:hover:text-indigo-300 hover:underline"
                   >
                     {author.name}
                   </Link>
                 ) : (
-                  <span className="font-semibold">{author.name}</span>
+                  <span className="font-semibold text-slate-900 dark:text-white">{author.name}</span>
                 )}
                 {author.institution && (
                   <span className="text-[11px] text-slate-400 flex items-center gap-0.5">
@@ -123,17 +148,26 @@ export default async function PaperDetailPage({ params }: { params: { id: string
         </div>
       </header>
 
-      {/* Client Action Bar (PDF, AI, Citation, Bookmark) */}
+      {/* Truthful Content Status Notice */}
+      <div className={`flex items-start gap-3 rounded-xl border p-4 text-xs leading-relaxed ${contentStatus.badgeColor}`}>
+        <StatusIcon className="h-4 w-4 shrink-0 mt-0.5" />
+        <div>
+          <span className="font-semibold">{contentStatus.badge}: </span>
+          <span>{contentStatus.description}</span>
+        </div>
+      </div>
+
+      {/* Client Action Bar (PDF, AI Companion, Citation, Bookmark, Reader) */}
       <PaperDetailClient paper={paper} />
 
       {/* Abstract */}
-      <section className="p-6 sm:p-8 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
-          <FileText className="w-4 h-4" />
+      <section className="p-6 sm:p-8 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+        <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-2">
+          <FileText className="w-4 h-4 text-indigo-600" />
           Abstract
         </h2>
         {paper.abstract ? (
-          <p className="text-sm sm:text-base text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line font-serif">
+          <p className="text-base text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-line font-serif">
             {paper.abstract}
           </p>
         ) : (
@@ -191,7 +225,7 @@ export default async function PaperDetailPage({ params }: { params: { id: string
           <div>
             <dt className="text-slate-400">Data Source</dt>
             <dd className="uppercase font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
-              {paper.source}
+              {paper.source} (Public Open Scholarly API)
             </dd>
           </div>
 
@@ -206,7 +240,7 @@ export default async function PaperDetailPage({ params }: { params: { id: string
           <div>
             <dt className="text-slate-400">Access Type</dt>
             <dd className="text-slate-800 dark:text-slate-200 mt-0.5">
-              {paper.isOpenAccess ? "Open Access (Public)" : "Restricted / Publisher Landing"}
+              {paper.isOpenAccess ? "Open Access (Publicly Accessible PDF)" : "Restricted / Publisher Landing"}
             </dd>
           </div>
         </dl>

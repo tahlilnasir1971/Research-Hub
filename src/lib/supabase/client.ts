@@ -1,5 +1,8 @@
 import { Paper } from "../scholarly/types";
 
+export type ReadingStatus = "to_read" | "reading" | "completed" | "archived";
+export type RoadmapStage = "foundational" | "methodological" | "specialized" | "extension";
+
 export interface BookmarkedPaper {
   id: string;
   title: string;
@@ -7,6 +10,11 @@ export interface BookmarkedPaper {
   publicationYear: number;
   doi?: string;
   savedAt: string;
+  status?: ReadingStatus;
+  notes?: string;
+  tags?: string[];
+  roadmapStage?: RoadmapStage;
+  researchQuestion?: string;
 }
 
 export function isSupabaseConfigured(): boolean {
@@ -15,7 +23,7 @@ export function isSupabaseConfigured(): boolean {
   return Boolean(url && key && url.trim().length > 0 && key.trim().length > 0);
 }
 
-// LocalStorage fallback implementation ($0 cost, 100% offline & anonymous friendly)
+// LocalStorage implementation ($0 cost, 100% offline & anonymous friendly)
 const LOCAL_STORAGE_KEY = "research_hub_saved_papers";
 
 export function getLocalBookmarks(): BookmarkedPaper[] {
@@ -46,6 +54,10 @@ export function toggleLocalBookmark(paper: Paper): boolean {
         publicationYear: paper.publicationYear,
         doi: paper.doi,
         savedAt: new Date().toISOString(),
+        status: "to_read",
+        notes: "",
+        tags: [],
+        roadmapStage: "foundational",
       };
       updated = [newEntry, ...current];
     }
@@ -55,6 +67,23 @@ export function toggleLocalBookmark(paper: Paper): boolean {
     return !exists;
   } catch (err) {
     console.error("Failed to update localStorage bookmarks:", err);
+    return false;
+  }
+}
+
+export function updateLocalBookmark(paperId: string, updates: Partial<BookmarkedPaper>): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const current = getLocalBookmarks();
+    const index = current.findIndex((p) => p.id === paperId);
+    if (index === -1) return false;
+
+    current[index] = { ...current[index], ...updates };
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(current));
+    window.dispatchEvent(new Event("bookmarks-updated"));
+    return true;
+  } catch (err) {
+    console.error("Failed to update bookmark:", err);
     return false;
   }
 }

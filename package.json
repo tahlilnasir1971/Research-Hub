@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "npx tsx --test tests/scholarly.test.mjs tests/citation.test.mjs tests/ai-adapter.test.mjs"
+    "test": "npx tsx --test tests/scholarly.test.mjs tests/citation.test.mjs tests/ai-adapter.test.mjs tests/opportunities.test.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",
